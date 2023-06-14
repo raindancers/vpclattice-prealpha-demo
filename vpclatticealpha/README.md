@@ -1,14 +1,20 @@
-# Welcome to your CDK TypeScript project
+# vpclattice-prealpha-demo
+Prealpha Demo - 
 
-This is a blank project for CDK development with TypeScript.
+This is rough, buggy, and is going to move quite quickly.  Expect things not to work.. this is early code. 
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+1. clone repo
+2. cd vpclatticealpha
+3. npm install
+4. cdk synth
+5. cdk deploy --profile <yourprofile>
 
-## Useful commands
+Go to the reigion/account you have deployed to, 
+Find the Ec2 instance  called ( VpclatticealphaStack/SupportResources/demoEC2instance ) and use SSM to connect to it.
+Find the URL of the service from Lattice in EC2..
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+from the console of the ec2 instance.. 
+```bash
+curl https://<url>/hello
+curl https://<url>/goodbye
+curl https://<url>/thisdoesnotexisit
