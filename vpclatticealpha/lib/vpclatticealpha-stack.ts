@@ -23,10 +23,10 @@ export class VpclatticealphaStack extends cdk.Stack {
     // add a listenerRule that will use the helloworld lambda as a Target
     listener.addListenerRule({
       name: 'helloworld',
-      priority: 100,
+      priority: 10,
       action: [
         {
-          targetGroup: new vpclattice.TargetGroup(this, 'lambdatargets', {
+          targetGroup: new vpclattice.TargetGroup(this, 'hellolambdatargets', {
             name: 'hellowworld',
             target: vpclattice.Target.lambda([
               support.helloWorld,
@@ -42,27 +42,27 @@ export class VpclatticealphaStack extends cdk.Stack {
       allowedPrincipals: [support.ec2instance.role],
     });
 
-    // add a listenerRule that will use the goodbyeworld lambda as a Target
-    // listener.addListenerRule({
-    //   name: 'goodbyeworld',
-    //   priority: 200,
-    //   action: [
-    //     {
-    //       targetGroup: new vpclattice.TargetGroup(this, 'lambdatargets', {
-    //         name: 'goodbyeworld',
-    //         target: vpclattice.Target.lambda([
-    //           support.goodbyeWorld,
-    //         ]),
-    //       }),
-    //     },
-    //   ],
+    //add a listenerRule that will use the goodbyeworld lambda as a Target
+    listener.addListenerRule({
+      name: 'goodbyeworld',
+      priority: 20,
+      action: [
+        {
+          targetGroup: new vpclattice.TargetGroup(this, 'goodbyelambdatargets', {
+            name: 'goodbyeworld',
+            target: vpclattice.Target.lambda([
+              support.goodbyeWorld,
+            ]),
+          }),
+        },
+      ],
       
-    //   httpMatch: {
-    //     pathMatches: { path: '/goodbye' },
-    //   },
-    //   // we will only allow access to this service from the ec2 instance
-    //   allowedPrincipals: [support.ec2instance.role],
-    // });
+      httpMatch: {
+        pathMatches: { path: '/goodbye' },
+      },
+      // we will only allow access to this service from the ec2 instance
+      allowedPrincipals: [support.ec2instance.role],
+    });
 
     // create a latticeServiceNetwork using the default settings for a Service network;
     // - Requires an IAM policy, do not allow access outside this org,
@@ -70,7 +70,6 @@ export class VpclatticealphaStack extends cdk.Stack {
     // associate the vpcs
     // assocaite the services with the servicenetwork
     const serviceNetwork = new vpclattice.ServiceNetwork(this, 'ServiceNetwork', {
-      allowUnauthenticatedAccess: true,
       vpcs: [
         support.vpc1,
         support.vpc2,
