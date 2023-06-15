@@ -70,6 +70,7 @@ export class VpclatticealphaStack extends cdk.Stack {
     // associate the vpcs
     // assocaite the services with the servicenetwork
     const serviceNetwork = new vpclattice.ServiceNetwork(this, 'ServiceNetwork', {
+      allowUnauthenticatedAccess: true,
       vpcs: [
         support.vpc1,
         support.vpc2,
@@ -81,7 +82,15 @@ export class VpclatticealphaStack extends cdk.Stack {
     });
 
     // after adding rules, apply the auth policy to the service and Service Network
+    
+  
+    console.log(JSON.stringify(latticeService.authPolicy))
+    console.log(JSON.stringify(serviceNetwork.authPolicy))
+
+    
+
     latticeService.applyAuthPolicy();
+
     serviceNetwork.applyAuthPolicyToServiceNetwork();
 
   }
