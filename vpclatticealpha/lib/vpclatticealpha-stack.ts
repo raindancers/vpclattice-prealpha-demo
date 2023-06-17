@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as vpclattice from 'aws-vpclattice-prealpha';
 import { SupportResources } from './support';
+import { aws_iam as iam } from 'aws-cdk-lib';
 
 
 export class VpclatticealphaStack extends cdk.Stack {
@@ -13,12 +14,19 @@ export class VpclatticealphaStack extends cdk.Stack {
     
     // create a vpc lattice service, and associate it with the service network
     // the listener use defaults of HTTPS, on port 443, and have a default action of 404 NOT FOUND
-    const latticeService = new vpclattice.Service(this, 'latticeService', {
+    const myLatticeService = new vpclattice.Service(this, 'myLatticeService', {
+      // we will all unauthenticated requests to be used
       allowUnauthenticatedAccess: true,
     });
+
+    myLatticeService.node.addDependency(support.vpc1);
+    myLatticeService.node.addDependency(support.vpc2);
     
     // add a listener to the service
-    const listener = latticeService.addListener({});
+    const listener = new vpclattice.Listener(this, 'Listener', {
+      service: myLatticeService,
+      
+    })
 
     // add a listenerRule that will use the helloworld lambda as a Target
     listener.addListenerRule({
@@ -39,7 +47,7 @@ export class VpclatticealphaStack extends cdk.Stack {
         pathMatches: { path: '/hello' },
       },
       // we will only allow access to this service from the ec2 instance
-      allowedPrincipals: [support.ec2instance.role],
+      allowedPrincipals: [new iam.StarPrincipal()],
     });
 
     //add a listenerRule that will use the goodbyeworld lambda as a Target
@@ -74,23 +82,15 @@ export class VpclatticealphaStack extends cdk.Stack {
       vpcs: [
         support.vpc1,
         support.vpc2,
-        support.vpc3
+        support.vpc3,
       ],
       services: [
-        latticeService
+        myLatticeService
       ]
     });
 
     // after adding rules, apply the auth policy to the service and Service Network
-    
-  
-    console.log(JSON.stringify(latticeService.authPolicy))
-    console.log(JSON.stringify(serviceNetwork.authPolicy))
-
-    
-
-    latticeService.applyAuthPolicy();
-
+    myLatticeService.applyAuthPolicy();
     serviceNetwork.applyAuthPolicyToServiceNetwork();
 
   }

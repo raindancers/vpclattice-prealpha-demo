@@ -36,7 +36,7 @@ export class SupportResources extends Construct {
       natGateways: 0,
     });
 
-    // a vpc for a consumer of the service, ( ec2 instance )
+    // a vpc for the goodbye world lambda
     this.vpc3 = new ec2.Vpc(this, 'VPC3', {
       ipAddresses: ec2.IpAddresses.cidr('10.10.0.0/16'),
       maxAzs: 2,
@@ -51,6 +51,7 @@ export class SupportResources extends Construct {
     this.vpc3.addInterfaceEndpoint('ssm_mewssages', {
       service: ec2.InterfaceVpcEndpointAwsService.SSM_MESSAGES,
     })
+
 
   // give the hello lambda a role and permissions
     const helloRole = new iam.Role(this, 'helloRole', {
@@ -104,7 +105,7 @@ export class SupportResources extends Construct {
       role: goodbyeRole,
     });
 
-    // create an ec2instance which will be where we can consume the lattive service from
+  // create an ec2instance which will be where we can consume the lattive service from
     this.ec2instance = new ec2.Instance(this, 'demoEC2instance', {
       machineImage: ec2.MachineImage.latestAmazonLinux2(),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE2, ec2.InstanceSize.MICRO),
@@ -113,5 +114,6 @@ export class SupportResources extends Construct {
       ssmSessionPermissions: true,
       requireImdsv2: true,
     })
+
   }
 }
