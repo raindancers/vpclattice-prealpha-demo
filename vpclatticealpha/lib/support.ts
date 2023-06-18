@@ -14,8 +14,6 @@ export class SupportResources extends Construct {
   public helloWorld: core.aws_lambda.Function;
   public goodbyeWorld: core.aws_lambda.Function;
   public vpc1: ec2.Vpc;
-  public vpc2: ec2.Vpc;
-  public vpc3: ec2.Vpc;
   public ec2instance: ec2.Instance;
 
   constructor(scope: Construct, id: string) {
@@ -29,26 +27,12 @@ export class SupportResources extends Construct {
       natGateways: 0,
     });
 
-	  // a vpc for the goodbye world lambda
-    this.vpc2 = new ec2.Vpc(this, 'VPC2', {
-      ipAddresses: ec2.IpAddresses.cidr('10.10.0.0/16'),
-      maxAzs: 2,
-      natGateways: 0,
-    });
-
-    // a vpc for the goodbye world lambda
-    this.vpc3 = new ec2.Vpc(this, 'VPC3', {
-      ipAddresses: ec2.IpAddresses.cidr('10.10.0.0/16'),
-      maxAzs: 2,
-      natGateways: 0,
-    });
-
     // add endpoints in the vpc, so, we can get to an instance via ssm
-    this.vpc3.addInterfaceEndpoint('ssm', {
+    this.vpc1.addInterfaceEndpoint('ssm', {
       service: ec2.InterfaceVpcEndpointAwsService.SSM,
     })
 
-    this.vpc3.addInterfaceEndpoint('ssm_mewssages', {
+    this.vpc1.addInterfaceEndpoint('ssm_mewssages', {
       service: ec2.InterfaceVpcEndpointAwsService.SSM_MESSAGES,
     })
 
@@ -89,8 +73,6 @@ export class SupportResources extends Construct {
       handler: 'helloworld.lambda_handler',
       code: aws_lambda.Code.fromAsset(path.join(__dirname, './lambda' )),
       timeout: core.Duration.seconds(15),
-      vpc: this.vpc1,
-      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       role: helloRole,
     });
 
@@ -100,8 +82,6 @@ export class SupportResources extends Construct {
       handler: 'goodbyeworld.lambda_handler',
       code: aws_lambda.Code.fromAsset(path.join(__dirname, './lambda' )),
       timeout: core.Duration.seconds(15),
-      vpc: this.vpc2,
-      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       role: goodbyeRole,
     });
 
@@ -109,7 +89,7 @@ export class SupportResources extends Construct {
     this.ec2instance = new ec2.Instance(this, 'demoEC2instance', {
       machineImage: ec2.MachineImage.latestAmazonLinux2(),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE2, ec2.InstanceSize.MICRO),
-      vpc: this.vpc3,
+      vpc: this.vpc1,
       allowAllOutbound: true,
       ssmSessionPermissions: true,
       requireImdsv2: true,

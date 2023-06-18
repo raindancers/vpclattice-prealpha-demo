@@ -16,16 +16,11 @@ export class VpclatticealphaStack extends cdk.Stack {
     // the listener use defaults of HTTPS, on port 443, and have a default action of 404 NOT FOUND
     const myLatticeService = new vpclattice.Service(this, 'myLatticeService', {
       // we will all unauthenticated requests to be used
-      allowUnauthenticatedAccess: true,
     });
 
-    myLatticeService.node.addDependency(support.vpc1);
-    myLatticeService.node.addDependency(support.vpc2);
-    
     // add a listener to the service
     const listener = new vpclattice.Listener(this, 'Listener', {
       service: myLatticeService,
-      
     })
 
     // add a listenerRule that will use the helloworld lambda as a Target
@@ -47,7 +42,7 @@ export class VpclatticealphaStack extends cdk.Stack {
         pathMatches: { path: '/hello' },
       },
       // we will only allow access to this service from the ec2 instance
-      allowedPrincipals: [new iam.StarPrincipal()],
+      accessMode: vpclattice.RuleAccessMode.UNAUTHENTICATED
     });
 
     //add a listenerRule that will use the goodbyeworld lambda as a Target
@@ -70,6 +65,7 @@ export class VpclatticealphaStack extends cdk.Stack {
       },
       // we will only allow access to this service from the ec2 instance
       allowedPrincipals: [support.ec2instance.role],
+      accessMode: vpclattice.RuleAccessMode.AUTHENTICATED_ONLY,
     });
 
     // create a latticeServiceNetwork using the default settings for a Service network;
@@ -78,11 +74,9 @@ export class VpclatticealphaStack extends cdk.Stack {
     // associate the vpcs
     // assocaite the services with the servicenetwork
     const serviceNetwork = new vpclattice.ServiceNetwork(this, 'ServiceNetwork', {
-      allowUnauthenticatedAccess: true,
+      accessmode: vpclattice.ServiceNetworkAccessMode.UNAUTHENTICATED,
       vpcs: [
         support.vpc1,
-        support.vpc2,
-        support.vpc3,
       ],
       services: [
         myLatticeService
