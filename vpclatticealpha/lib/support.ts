@@ -8,6 +8,7 @@ import {
 }
   from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { Effect } from 'aws-cdk-lib/aws-iam';
 
 export class SupportResources extends Construct {
 
@@ -87,7 +88,7 @@ export class SupportResources extends Construct {
 
   // create an ec2instance which will be where we can consume the lattive service from
     this.ec2instance = new ec2.Instance(this, 'demoEC2instance', {
-      machineImage: ec2.MachineImage.latestAmazonLinux2(),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE2, ec2.InstanceSize.MICRO),
       vpc: this.vpc1,
       allowAllOutbound: true,
@@ -95,5 +96,11 @@ export class SupportResources extends Construct {
       requireImdsv2: true,
     })
 
+    this.ec2instance.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['vpc-lattice-svcs:Invoke'],
+      resources: ["*"],
+    })
+    
   }
 }
