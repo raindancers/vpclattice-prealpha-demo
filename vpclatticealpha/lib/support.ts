@@ -100,7 +100,6 @@ export class SupportResources extends Construct {
       effect: iam.Effect.ALLOW,
       actions: ['vpc-lattice-svcs:Invoke'],
       resources: ["*"],
-    })
-    
+    }));
   }
 }
