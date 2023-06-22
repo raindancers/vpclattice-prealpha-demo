@@ -2,7 +2,11 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as vpclattice from 'aws-vpclattice-prealpha';
 import { SupportResources } from './support';
-import { aws_iam as iam } from 'aws-cdk-lib';
+import { 
+  aws_iam as iam,
+  aws_ec2 as ec2, 
+} 
+  from 'aws-cdk-lib';
 
 
 export class VpclatticealphaStack extends cdk.Stack {
@@ -68,11 +72,49 @@ export class VpclatticealphaStack extends cdk.Stack {
       accessMode: vpclattice.RuleAccessMode.AUTHENTICATED_ONLY,
     });
 
-    // create a latticeServiceNetwork using the default settings for a Service network;
-    // - Requires an IAM policy, do not allow access outside this org,
-    // Overide the default option to allow unauthenticated/signed requests 
-    // associate the vpcs
-    // assocaite the services with the servicenetwork
+    //add a listenerRule that will use the goodbyeworld lambda as a Target
+
+    listener.addListenerRule({
+      name: 'ListenerRule30',
+      priority: 30,
+      httpMatch: {
+        pathMatches: { path: '/path3' },
+        method: vpclattice.HTTPMethods.GET,
+      },
+      allowedPrincipals: [new iam.AccountPrincipal('123456123456')],
+      accessMode: vpclattice.RuleAccessMode.AUTHENTICATED_ONLY,
+      action: [
+        {
+          targetGroup: new vpclattice.TargetGroup(this, 'instanceTargets', {
+            name: 'instanceTargets',
+            target: vpclattice.Target.ec2instance(
+              [
+                new ec2.Instance(this, 'Instance1', {
+                  instanceType: new ec2.InstanceType('t2.micro'),
+                  machineImage: ec2.MachineImage.latestAmazonLinux2022(),
+                  vpc: support.vpc1
+                }),
+              ],
+              {
+                vpc: support.vpc1,
+                protocol: vpclattice.Protocol.HTTP,
+                healthcheck: vpclattice.HealthCheck.check({
+                  protocol: vpclattice.Protocol.HTTP,
+                  healthCheckInterval: cdk.Duration.seconds(60),
+                  healthCheckTimeout: cdk.Duration.seconds(10),
+                  healthyThresholdCount: 2,
+                  protocolVersion: vpclattice.ProtocolVersion.HTTP1,
+                  unhealthyThresholdCount: 2,
+                  matcher: vpclattice.FixedResponse.OK,
+                }),
+              },
+            ),
+          }),
+        },
+      ],
+    });
+    
+      
     const serviceNetwork = new vpclattice.ServiceNetwork(this, 'ServiceNetwork', {
       accessmode: vpclattice.ServiceNetworkAccessMode.UNAUTHENTICATED,
       vpcs: [

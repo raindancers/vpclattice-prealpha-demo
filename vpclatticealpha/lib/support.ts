@@ -5,6 +5,7 @@ import {
   aws_iam as iam,
   aws_ec2 as ec2,
   aws_lambda,
+  aws_logs as logs
 }
   from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -75,6 +76,7 @@ export class SupportResources extends Construct {
       code: aws_lambda.Code.fromAsset(path.join(__dirname, './lambda' )),
       timeout: core.Duration.seconds(15),
       role: helloRole,
+      logRetention: logs.RetentionDays.FIVE_DAYS,
     });
 
 	// create the goodbye world lambda
@@ -84,6 +86,7 @@ export class SupportResources extends Construct {
       code: aws_lambda.Code.fromAsset(path.join(__dirname, './lambda' )),
       timeout: core.Duration.seconds(15),
       role: goodbyeRole,
+      logRetention: logs.RetentionDays.FIVE_DAYS,      
     });
 
   // create an ec2instance which will be where we can consume the lattive service from
