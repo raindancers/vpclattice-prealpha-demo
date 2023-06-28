@@ -8,7 +8,8 @@ log.setLevel(logging.INFO)
 def lambda_handler(event, context):
 	try:
 		region = os.environ.get('AWS_REGION')
-		response = "Hello from " + region + "\n"
+		name = os.enviro.get('NAME')
+		response = "Hello from the "+ name + " service in " + region + "\n"
 		return {
 			"statusCode": 200,
 			"statusDescription": "200 OK",
